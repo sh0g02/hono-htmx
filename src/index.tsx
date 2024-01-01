@@ -2,27 +2,20 @@ import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
 
-import { renderer, AddTodo, Item } from './components'
+import {renderer, AddTodo, Item, Download, TestCode} from './components'
 
-type Bindings = {
-  DB: D1Database
-}
 
-type Todo = {
-  title: string
-  id: string
-}
-
-const app = new Hono<{ Bindings: Bindings }>()
+const app = new Hono()
 
 app.get('*', renderer)
 
 app.get('/', async (c) => {
-  const { results } = await c.env.DB.prepare(`SELECT id, title FROM todo;`).all<Todo>()
-  const todos = results
+  const todos = [{ id: 1, title: 'ほげ' }]
+
   return c.render(
     <div>
       <AddTodo />
+      <Download />
       {todos.map((todo) => {
         return <Item title={todo.title} id={todo.id} />
       })}
@@ -31,27 +24,38 @@ app.get('/', async (c) => {
   )
 })
 
+
+app.get('/download', async (c) => {
+    // 1. フォームの値のバリデーション
+    // 2. 入力されたフォームから、JSのコードを決定
+    // 3. HTMLとしてreturn
+
+    // const highlightedCode = hljs.highlight(
+    //     'console.log(hihidsih)',
+    //     { language: 'js' }
+    // ).value
+    return c.html(<div><TestCode/></div>)
+})
+
 app.post(
   '/todo',
-  zValidator(
-    'form',
-    z.object({
-      title: z.string().min(1)
-    })
-  ),
+  // zValidator(
+  //   'form',
+  //   z.object({
+  //     title: z.string().min(1)
+  //   })
+  // ),
   async (c) => {
-    const { title } = c.req.valid('form')
-    const id = crypto.randomUUID()
-    await c.env.DB.prepare(`INSERT INTO todo(id, title) VALUES(?, ?);`).bind(id, title).run()
-    return c.html(<Item title={title} id={id} />)
+    // const { title } = c.req.valid('form')
+    // const id = crypto.randomUUID()
+    return c.html(<>わいわい</>)
   }
 )
 
-app.delete('/todo/:id', async (c) => {
-  const id = c.req.param('id')
-  await c.env.DB.prepare(`DELETE FROM todo WHERE id = ?;`).bind(id).run()
-  c.status(200)
-  return c.body(null)
-})
+// app.delete('/todo/:id', async (c) => {
+//   const id = c.req.param('id')
+//   c.status(200)
+//   return c.body(null)
+// })
 
 export default app

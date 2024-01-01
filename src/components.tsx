@@ -1,5 +1,6 @@
 import { html } from 'hono/html'
 import { jsxRenderer } from 'hono/jsx-renderer'
+import hljs from 'highlight.js'
 
 export const renderer = jsxRenderer(({ children }) => {
   return html`
@@ -8,8 +9,21 @@ export const renderer = jsxRenderer(({ children }) => {
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <script src="https://unpkg.com/htmx.org@1.9.3"></script>
+        <script src="https://unpkg.com/shiki"></script>
         <script src="https://unpkg.com/hyperscript.org@0.9.9"></script>
         <script src="https://cdn.tailwindcss.com"></script>
+
+      <script>
+          shiki
+                  .getHighlighter({
+                      theme: 'nord',
+                      langs: ['js'],
+                  })
+                  .then(highlighter => {
+                      const code = highlighter.codeToHtml(\`console.log('shiki');\`, {lang: 'js'})
+                      document.getElementById('output').innerHTML = code
+                  })
+      </script>
         <title>Hono + htmx</title>
       </head>
       <body>
@@ -33,9 +47,21 @@ export const AddTodo = () => (
   </form>
 )
 
-export const Item = ({ title, id }: { title: string; id: string }) => (
-  <p
-    hx-delete={`/todo/${id}`}
+export const Download = () => {
+    return <button hx-get="/download" hx-trigger="click">Download JS File</button>
+}
+
+export const TestCode = () => {
+    const highlightedCode = hljs.highlight(
+        'console.log(hihidsih)',
+        { language: 'js' }
+    ).value
+    return <div>{highlightedCode}</div>
+}
+
+export const Item = ({title, id}: { title: string; id: number }) => (
+    <p
+        hx-delete={`/todo/${id}`}
     hx-swap="outerHTML"
     class="flex row items-center justify-between py-1 px-4 my-1 rounded-lg text-lg border bg-gray-100 text-gray-600 mb-2"
   >
