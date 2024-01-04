@@ -1,9 +1,8 @@
 import { Hono } from 'hono'
 import { z } from 'zod'
 import { zValidator } from '@hono/zod-validator'
-
-import {renderer, AddTodo, Item, Download, TestCode} from './components'
-
+import hljs from 'highlight.js'
+import { renderer, Download } from './components'
 
 const app = new Hono()
 
@@ -14,12 +13,7 @@ app.get('/', async (c) => {
 
   return c.render(
     <div>
-      <AddTodo />
       <Download />
-      {todos.map((todo) => {
-        return <Item title={todo.title} id={todo.id} />
-      })}
-      <div id="todo"></div>
     </div>
   )
 })
@@ -30,17 +24,32 @@ app.get('/download', async (c) => {
     // 2. 入力されたフォームから、JSのコードを決定
     // 3. HTMLとしてreturn
 
-    // const highlightedCode = hljs.highlight(
-    //     'console.log(hihidsih)',
-    //     { language: 'js' }
-    // ).value
-    return c.html(<div><TestCode/></div>)
+    const code = `
+function greet(name) {
+  return 'Hello, ' + name + '!'; // ここをいい感じに修正して
+}
+`;
+
+    const highlightedCode = hljs.highlight(code, { language: 'js' }).value
+
+    // レンダリングするHTML（JSX）
+    const html = (
+        <html>
+            <body>
+                <pre>
+                    <code dangerouslySetInnerHTML={{__html: highlightedCode}}/>
+                </pre>
+            </body>
+        </html>
+    );
+
+    return c.html(html)
 })
 
 app.post(
-  '/todo',
-  // zValidator(
-  //   'form',
+    '/todo',
+    // zValidator(
+    //   'form',
   //   z.object({
   //     title: z.string().min(1)
   //   })
@@ -51,11 +60,5 @@ app.post(
     return c.html(<>わいわい</>)
   }
 )
-
-// app.delete('/todo/:id', async (c) => {
-//   const id = c.req.param('id')
-//   c.status(200)
-//   return c.body(null)
-// })
 
 export default app
