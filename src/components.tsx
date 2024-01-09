@@ -23,6 +23,24 @@ export const renderer = jsxRenderer(({ children }) => {
   `
 })
 
-export const Download = () => {
-    return <button hx-get="/download" hx-trigger="click" hx-swap="outerHTML">JavaScriptを生成する</button>
-}
+export const Show = () => (
+    <form hx-post="/show" hx-swap="outerHTML" class="mb-4">
+        <div class="mb-2">
+            <div>
+                <input type="checkbox" id="eventsSave" name="eventsSave" value='true' />
+                <label for="eventsSave">保存したとき</label>
+            </div>
+            <div>
+                <input type="checkbox" id="eventsShow" name="eventsShow" value='true' />
+                <label for="eventsShow">表示したとき</label>
+            </div>
+        </div>
+        <div class="mb-2">
+            <label for="title" class="form-label">対象となるアプリID</label>
+            <input name="title" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg p-2.5"/>
+        </div>
+        <button class="text-white bg-blue-700 hover:bg-blue-800 rounded-lg px-5 py-2 text-center" type="submit">
+            JSのコードを生成する
+        </button>
+    </form>
+)

@@ -1,38 +1,53 @@
 import { Hono } from 'hono'
-import { z } from 'zod'
+import {array, string, z} from 'zod'
 import { zValidator } from '@hono/zod-validator'
 import hljs from 'highlight.js'
-import { renderer, Download } from './components'
+import {renderer, Show} from './components'
 
 const app = new Hono()
 
 app.get('*', renderer)
 
+// 初期表示
 app.get('/', async (c) => {
-  const todos = [{ id: 1, title: 'ほげ' }]
-
-  return c.render(
-    <div>
-      <Download />
-    </div>
-  )
+  return c.render(<Show />)
 })
 
+const test =
 
-app.get('/download', async (c) => {
+app.post('/show',
+    zValidator(
+        'form',
+        z.object({
+            title: z.string().min(1),
+            eventsSave: z.string().optional(),
+            eventsShow: z.string().optional(),
+        })
+    ),
+    async (c) => {
     // 1. フォームの値のバリデーション
     // 2. 入力されたフォームから、JSのコードを決定
     // 3. HTMLとしてreturn
 
-    const code = `
+        console.log(c.req.valid('form'))
+
+        const { title } = c.req.valid('form')
+
+        const code = `
 function greet(name) {
   return 'Hello, ' + name + '!'; // ここをいい感じに修正して
 }
+
+document.getElementById("myButton").addEventListener("click", function() {
+    alert("${title}と入力されました");
+});
+
+[1, 2, 3].forEach(function(element) {
+    console.log(element);
+});
 `;
 
     const highlightedCode = hljs.highlight(code, { language: 'js' }).value
-
-    // レンダリングするHTML（JSX）
     const html = (
         <html>
             <body>
@@ -42,23 +57,7 @@ function greet(name) {
             </body>
         </html>
     );
-
     return c.html(html)
 })
-
-app.post(
-    '/todo',
-    // zValidator(
-    //   'form',
-  //   z.object({
-  //     title: z.string().min(1)
-  //   })
-  // ),
-  async (c) => {
-    // const { title } = c.req.valid('form')
-    // const id = crypto.randomUUID()
-    return c.html(<>わいわい</>)
-  }
-)
 
 export default app
